@@ -1,5 +1,7 @@
-import { statSync, openSync, readSync, closeSync, readFileSync } from "node:fs";
+import { statSync, openSync, readSync, closeSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { homedir } from "node:os";
+import { join as joinPath } from "node:path";
 
 // img2key - derive deterministic passwords from images
 
@@ -108,6 +110,25 @@ const DIGITS = "0123456789";
 const SPECIALS = "!@#$%^&";
 const ALL = UPPER + LOWER + DIGITS + SPECIALS;
 
+function sanitizeName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function resolveOutputDir(specified: string | null): string {
+  if (specified !== null) return specified;
+  return joinPath(homedir(), ".local", "share", "img2key");
+}
+
+function writePassword(password: string, siteName: string, outputDir: string): string {
+  const sanitized = sanitizeName(siteName);
+  const outPath = joinPath(outputDir, `${sanitized}.txt`);
+
+  mkdirSync(outputDir, { recursive: true });
+  writeFileSync(outPath, password + "\n", { mode: 0o600 });
+
+  return outPath;
+}
+
 function generatePassword(hash: Buffer, length: number): string {
   const pw: string[] = new Array(length);
   let byteIdx = 0;
@@ -145,12 +166,11 @@ function main() {
 
   const hashBytes = hashImage(args.imagePath);
   const password = generatePassword(hashBytes, args.length);
+  const outDir = resolveOutputDir(args.outputDir);
+  const outPath = writePassword(password, args.siteName, outDir);
 
-  console.log("imagePath:", args.imagePath);
-  console.log("siteName:", args.siteName);
-  console.log("length:", args.length);
-  console.log("outputDir:", args.outputDir);
   console.log("password:", password);
+  console.log("saved to:", outPath);
 }
 
 main();
