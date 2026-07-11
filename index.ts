@@ -1,4 +1,12 @@
-import { statSync, openSync, readSync, closeSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import {
+  statSync,
+  openSync,
+  readSync,
+  closeSync,
+  readFileSync,
+  mkdirSync,
+  writeFileSync,
+} from "node:fs";
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { join as joinPath } from "node:path";
@@ -11,7 +19,7 @@ const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
   JPEG: new Uint8Array([0xff, 0xd8, 0xff]),
   GIF: new Uint8Array([0x47, 0x49, 0x46, 0x38]), // "GIF8"
   WEBP: new Uint8Array([0x52, 0x49, 0x46, 0x46]), // "RIFF" — needs further check
-  BMP: new Uint8Array([0x42, 0x4d]),               // "BM"
+  BMP: new Uint8Array([0x42, 0x4d]), // "BM"
 };
 
 const VALID_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
@@ -43,8 +51,8 @@ function validateImagePath(path: string): void {
   readSync(fd, buffer, 0, 8, 0);
   closeSync(fd);
 
-  const isValidMagic = Object.entries(IMAGE_MAGIC_BYTES).some(
-    ([, magic]) => buffer.subarray(0, magic.length).equals(magic),
+  const isValidMagic = Object.entries(IMAGE_MAGIC_BYTES).some(([, magic]) =>
+    buffer.subarray(0, magic.length).equals(magic),
   );
 
   if (!isValidMagic) {
@@ -93,7 +101,9 @@ function parseArgs(raw: string[]): CliArgs {
   }
 
   if (imagePath === null || siteName === null) {
-    console.error("Usage: img2key <image-path> -n <site-name> [-l <length>] [-o <output-dir>]");
+    console.error(
+      "Usage: img2key <image-path> -n <site-name> [-l <length>] [-o <output-dir>]",
+    );
     process.exit(1);
   }
 
@@ -119,7 +129,11 @@ function resolveOutputDir(specified: string | null): string {
   return joinPath(homedir(), ".local", "share", "img2key");
 }
 
-function writePassword(password: string, siteName: string, outputDir: string): string {
+function writePassword(
+  password: string,
+  siteName: string,
+  outputDir: string,
+): string {
   const sanitized = sanitizeName(siteName);
   const outPath = joinPath(outputDir, `${sanitized}.txt`);
 
@@ -127,6 +141,26 @@ function writePassword(password: string, siteName: string, outputDir: string): s
   writeFileSync(outPath, password + "\n", { mode: 0o600 });
 
   return outPath;
+}
+
+const CLIPBOARD_CMDS: { cmd: string; hint: string }[] = [
+  { cmd: "wl-copy", hint: "wl-copy" },
+  { cmd: "xclip", hint: "xclip -sel clip" },
+  { cmd: "xsel", hint: "xsel -ib" },
+  { cmd: "pbcopy", hint: "pbcopy" },
+  { cmd: "clip.exe", hint: "clip.exe" },
+];
+
+function clipboardHint(): string {
+  const available = CLIPBOARD_CMDS.find(({ cmd }) => {
+    try {
+      const result = Bun.spawnSync(["which", cmd]);
+      return result.exitCode === 0;
+    } catch {
+      return false;
+    }
+  });
+  return available?.hint ?? "";
 }
 
 function generatePassword(hash: Buffer, length: number): string {
@@ -169,8 +203,13 @@ function main() {
   const outDir = resolveOutputDir(args.outputDir);
   const outPath = writePassword(password, args.siteName, outDir);
 
-  console.log("password:", password);
+  const clip = clipboardHint();
+
   console.log("saved to:", outPath);
+  if (clip) {
+    console.log(`quick copy: cat ${outPath} | ${clip}`);
+  }
 }
 
 main();
+
