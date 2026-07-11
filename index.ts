@@ -10,6 +10,7 @@ import {
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { join as joinPath } from "node:path";
+import { execSync } from "node:child_process";
 
 // img2key - derive deterministic passwords from images
 
@@ -124,9 +125,7 @@ function parseArgs(raw: string[]): CliArgs {
   }
 
   if (imagePath === null || siteName === null) {
-    console.error(
-      "Usage: img2key <image> -n <name> [-l <len>] [-o <dir>]",
-    );
+    console.error("Usage: img2key <image> -n <name> [-l <len>] [-o <dir>]");
     console.error("Run 'img2key --help' for details.");
     process.exit(1);
   }
@@ -175,18 +174,19 @@ const CLIPBOARD_CMDS: { cmd: string; hint: string }[] = [
   { cmd: "clip.exe", hint: "clip.exe" },
 ];
 
-function clipboardHint(): string {
-  const available = CLIPBOARD_CMDS.find(({ cmd }) => {
-    try {
-      const result = Bun.spawnSync(["which", cmd]);
-      return result.exitCode === 0;
-    } catch {
-      return false;
-    }
-  });
-  return available?.hint ?? "";
+function commandExists(cmd: string): boolean {
+  try {
+    execSync(`command -v ${cmd}`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
+function clipboardHint(): string {
+  const available = CLIPBOARD_CMDS.find(({ cmd }) => commandExists(cmd));
+  return available?.hint ?? "";
+}
 function generatePassword(hash: Buffer, length: number): string {
   const pw: string[] = new Array(length);
   let byteIdx = 0;
@@ -236,4 +236,3 @@ function main() {
 }
 
 main();
-
