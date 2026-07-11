@@ -3,21 +3,23 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-      ...
-    }:
-    flake-utils.lib.eachDefaultSystem (
+  outputs = { self, nixpkgs, ... }: let
+    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+
+    forAllSystems = f:
+      builtins.foldl' (acc: system:
+        let ret = f system; in {
+          packages = acc.packages // { ${system} = ret.packages; };
+          devShells = acc.devShells // { ${system} = ret.devShells; };
+        }
+      ) { packages = {}; devShells = {}; } systems;
+  in
+  forAllSystems (
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-
         nodejs = pkgs.nodejs_22;
       in
       {
@@ -25,7 +27,6 @@
           packages = with pkgs; [
             bun
             nodejs
-            git
           ];
 
           shellHook = ''
@@ -43,7 +44,6 @@
 
           buildPhase = ''
             bun build --compile \
-              --target=bun-linux-x64-modern \
               --outfile=img2key \
               ./index.ts
           '';
