@@ -5,9 +5,42 @@ Well, anyway, I made a thingy that does that!
 
 ## How Do I Use This?
 
-1. install from either the `AUR`, or use the provided `flake.nix`.
+1. install from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided `flake.nix` if you're on NixOS with flakes enabled.
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> --name <fileName> [--length <len>] [--out <dir>]`
+
+### How Do I Install This?
+
+#### Nix Flakes
+
+Adding this to your flake.nix
+
+```nix
+# flake.nix
+inputs = {
+  img2key = {
+    url = "github:khitboksy/img2key";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+};
+```
+
+will expose
+
+```nix
+inputs.img2key.packages.<system>.default
+```
+
+that you can invoke anywhere.
+
+#### Non-Nix Linux/MacOS
+
+Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)
+-- Linux
+download the binary for linux/mac, `img2key-Linux/MacOS`. Invoke the binary as the command.
+
+-- Windows
+download the .exe, run the exe, img2key is now a scary terminal command!
 
 ### Flags and Arguments
 
