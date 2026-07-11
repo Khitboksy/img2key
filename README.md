@@ -5,7 +5,7 @@ Well, anyway, I made a thingy that does that!
 
 ## How Do I Use This?
 
-1. install from either the `AUR`, or `nixpkgs`
+1. install from either the `AUR`, or use the provided `flake.nix`.
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> --name <fileName> [--length <len>] [--out <dir>]`
 
