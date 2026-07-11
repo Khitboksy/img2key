@@ -51,32 +51,69 @@ function validateImagePath(path: string): void {
   }
 }
 
-function hashImage(path: string): string {
-  const buffer = readFileSync(path);
-  const hash = createHash("sha256").update(buffer).digest("hex");
-  return hash;
+interface CliArgs {
+  imagePath: string;
+  siteName: string;
+  length: number;
+  outputDir: string | null;
 }
 
-function main() {
-  const args = process.argv.slice(2);
+function parseArgs(raw: string[]): CliArgs {
+  let imagePath: string | null = null;
+  let siteName: string | null = null;
+  let length = 32;
+  let outputDir: string | null = null;
 
-  if (args.length < 2) {
-    console.error("Usage: img2key <image-path> <site-name> [output-dir]");
+  for (let i = 0; i < raw.length; i++) {
+    const arg = raw[i]!;
+
+    if (arg === "--name" || arg === "-n") {
+      siteName = raw[++i] ?? null;
+    } else if (arg === "--length" || arg === "-l") {
+      const val = raw[++i];
+      if (val === undefined) break;
+      length = Number.parseInt(val, 10);
+      if (Number.isNaN(length) || length < 8 || length > 32) {
+        console.error("Error: --length must be a number between 8 and 32");
+        process.exit(1);
+      }
+    } else if (arg === "--out" || arg === "-o") {
+      outputDir = raw[++i] ?? null;
+    } else if (arg.startsWith("-")) {
+      console.error(`Error: unknown flag "${arg}"`);
+      process.exit(1);
+    } else if (imagePath === null) {
+      imagePath = arg;
+    } else {
+      console.error(`Error: unexpected argument "${arg}"`);
+      process.exit(1);
+    }
+  }
+
+  if (imagePath === null || siteName === null) {
+    console.error("Usage: img2key <image-path> -n <site-name> [-l <length>] [-o <output-dir>]");
     process.exit(1);
   }
 
-  const imagePath = args[0]!;
-  const siteName = args[1]!;
-  const outputDir = args[2] ?? null;
+  return { imagePath, siteName, length, outputDir };
+}
 
-  validateImagePath(imagePath);
+function hashImage(path: string): Buffer {
+  return createHash("sha256").update(readFileSync(path)).digest();
+}
 
-  const shaKey = hashImage(imagePath);
+function main() {
+  const args = parseArgs(process.argv.slice(2));
 
-  console.log("imagePath:", imagePath);
-  console.log("siteName:", siteName);
-  console.log("outputDir:", outputDir);
-  console.log("sha256:", shaKey);
+  validateImagePath(args.imagePath);
+
+  const hashBytes = hashImage(args.imagePath);
+
+  console.log("imagePath:", args.imagePath);
+  console.log("siteName:", args.siteName);
+  console.log("length:", args.length);
+  console.log("outputDir:", args.outputDir);
+  console.log("sha256:", hashBytes.toString("hex"));
 }
 
 main();
