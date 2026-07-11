@@ -5,18 +5,39 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, ... }: let
-    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+  outputs =
+    { self, nixpkgs, ... }:
+    let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
-    forAllSystems = f:
-      builtins.foldl' (acc: system:
-        let ret = f system; in {
-          packages = acc.packages // { ${system} = ret.packages; };
-          devShells = acc.devShells // { ${system} = ret.devShells; };
-        }
-      ) { packages = {}; devShells = {}; } systems;
-  in
-  forAllSystems (
+      forAllSystems =
+        f:
+        builtins.foldl'
+          (
+            acc: system:
+            let
+              ret = f system;
+            in
+            {
+              packages = acc.packages // {
+                ${system} = ret.packages;
+              };
+              devShells = acc.devShells // {
+                ${system} = ret.devShells;
+              };
+            }
+          )
+          {
+            packages = { };
+            devShells = { };
+          }
+          systems;
+    in
+    forAllSystems (
       system:
       let
         pkgs = import nixpkgs { inherit system; };
