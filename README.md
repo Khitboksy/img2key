@@ -1,5 +1,82 @@
 # img2key
 
+Have you ever wanted your memes to ALSO be your password? No? shit...
+Well, anyway, I made a thingy that does that!
+
+## How Do I Use This?
+
+1. install from either the `AUR`, or `nixpkgs`
+2. find an image you want to use as a password
+3. `img2key <path/to/file.png> --name <fileName> [--length <len>] [--out <dir>]`
+
+### Flags and Arguments
+
+|  Flag  | Description    | Example |
+|--------------- | --------------- | --- |
+| `--name / -n` | Name of the generated file.  | `--name vaultwarden` > `vaultwarden.txt` |
+| `--length / -l` | Length of generated password. | `--length 12` |
+| `--out / -o` | Output directory. |  `--out /tmp/keys` > `/tmp/keys/vaultwarden.txt`|
+
+## I want to contribute
+
+It has some development dependencies.
+
+> Nix users can use the provided `flake.nix` to skip all of this!
+
+### Bun
+
+#### Linux
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+#### Windows
+
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+
+#### MacOS
+
+```bash
+brew install bun
+```
+
+### Node
+
+#### Arch/Cachy
+
+```bash
+sudo pacman -S nodejs
+```
+
+> Or you can use whatever repo you want, im not ur mom.
+
+#### Ubuntu/Debian
+
+```bash
+sudo apt install nodejs
+```
+
+> Why do I feel you already have these installed...
+
+#### Fedora/RHEL
+
+```bash
+sudo dnf install nodejs
+```
+
+> Deja-Vu...
+
+#### MacOS
+
+```bash
+brew install nodejs
+```
+
+## Actually doing dev work
+
 To install dependencies:
 
 ```bash
@@ -11,5 +88,3 @@ To run:
 ```bash
 bun run index.ts
 ```
-
-This project was created using `bun init` in bun v1.3.13. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
