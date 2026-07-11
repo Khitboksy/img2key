@@ -45,7 +45,7 @@
             bun build --compile \
               --target=bun-linux-x64-modern \
               --outfile=img2key \
-              ./src/index.ts
+              ./index.ts
           '';
 
           installPhase = ''
