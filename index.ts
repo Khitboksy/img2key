@@ -102,18 +102,55 @@ function hashImage(path: string): Buffer {
   return createHash("sha256").update(readFileSync(path)).digest();
 }
 
+const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LOWER = "abcdefghijklmnopqrstuvwxyz";
+const DIGITS = "0123456789";
+const SPECIALS = "!@#$%^&";
+const ALL = UPPER + LOWER + DIGITS + SPECIALS;
+
+function generatePassword(hash: Buffer, length: number): string {
+  const pw: string[] = new Array(length);
+  let byteIdx = 0;
+
+  // Wraps around if we run out of bytes (can't happen at max length of 32)
+  // but handles it cleanly anyway.
+  function nextByte(): number {
+    return hash[byteIdx++ % hash.length]!;
+  }
+
+  // 1. Reserve: guarantee one character from each class
+  pw[0] = UPPER[nextByte() % UPPER.length]!;
+  pw[1] = LOWER[nextByte() % LOWER.length]!;
+  pw[2] = DIGITS[nextByte() % DIGITS.length]!;
+  pw[3] = SPECIALS[nextByte() % SPECIALS.length]!;
+
+  // 2. Fill: remaining positions from the combined pool
+  for (let i = 4; i < length; i++) {
+    pw[i] = ALL[nextByte() % ALL.length]!;
+  }
+
+  // 3. Shuffle: Fisher-Yates, deterministic from the hash
+  for (let i = length - 1; i > 0; i--) {
+    const j = nextByte() % (i + 1);
+    [pw[i], pw[j]] = [pw[j]!, pw[i]!];
+  }
+
+  return pw.join("");
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
 
   validateImagePath(args.imagePath);
 
   const hashBytes = hashImage(args.imagePath);
+  const password = generatePassword(hashBytes, args.length);
 
   console.log("imagePath:", args.imagePath);
   console.log("siteName:", args.siteName);
   console.log("length:", args.length);
   console.log("outputDir:", args.outputDir);
-  console.log("sha256:", hashBytes.toString("hex"));
+  console.log("password:", password);
 }
 
 main();
