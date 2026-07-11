@@ -61,6 +61,27 @@ function validateImagePath(path: string): void {
   }
 }
 
+function printHelp(): never {
+  console.log(`
+img2key - derive deterministic passwords from images
+
+usage: img2key <image> -n <name> [-l <len>] [-o <dir>]
+
+arguments:
+  <image>                   path to the image file (png, jpg, gif, webp, bmp)
+
+options:
+  -n, --name <name>         site name (used as the output filename)
+  -l, --length <num>        password length (8-32, default: 32)
+  -o, --out <dir>           output directory (default: ~/.local/share/img2key/)
+  -h, --help                show this help text
+
+the password is written to a file with 600 permissions and printed only there,
+not in the terminal. a clipboard hint is shown when a compatible tool is found.
+`);
+  process.exit(0);
+}
+
 interface CliArgs {
   imagePath: string;
   siteName: string;
@@ -89,6 +110,8 @@ function parseArgs(raw: string[]): CliArgs {
       }
     } else if (arg === "--out" || arg === "-o") {
       outputDir = raw[++i] ?? null;
+    } else if (arg === "--help" || arg === "-h") {
+      printHelp();
     } else if (arg.startsWith("-")) {
       console.error(`Error: unknown flag "${arg}"`);
       process.exit(1);
@@ -102,8 +125,9 @@ function parseArgs(raw: string[]): CliArgs {
 
   if (imagePath === null || siteName === null) {
     console.error(
-      "Usage: img2key <image-path> -n <site-name> [-l <length>] [-o <output-dir>]",
+      "Usage: img2key <image> -n <name> [-l <len>] [-o <dir>]",
     );
+    console.error("Run 'img2key --help' for details.");
     process.exit(1);
   }
 
