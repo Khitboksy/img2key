@@ -1,4 +1,5 @@
-import { statSync, openSync, readSync, closeSync } from "node:fs";
+import { statSync, openSync, readSync, closeSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 // img2key - derive deterministic passwords from images
 
@@ -50,6 +51,12 @@ function validateImagePath(path: string): void {
   }
 }
 
+function hashImage(path: string): string {
+  const buffer = readFileSync(path);
+  const hash = createHash("sha256").update(buffer).digest("hex");
+  return hash;
+}
+
 function main() {
   const args = process.argv.slice(2);
 
@@ -64,9 +71,12 @@ function main() {
 
   validateImagePath(imagePath);
 
+  const shaKey = hashImage(imagePath);
+
   console.log("imagePath:", imagePath);
   console.log("siteName:", siteName);
   console.log("outputDir:", outputDir);
+  console.log("sha256:", shaKey);
 }
 
 main();
