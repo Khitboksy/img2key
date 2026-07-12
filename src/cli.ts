@@ -79,6 +79,7 @@ interface CliArgs {
   salt: string | null;
   stdout: boolean;
   bitwardenItem: string | null;
+  cleanup: boolean;
 }
 
 export function parseArgs(raw: string[]): CliArgs {
@@ -89,6 +90,7 @@ export function parseArgs(raw: string[]): CliArgs {
   let salt: string | null = null;
   let stdout = false;
   let bitwardenItem: string | null = null;
+  let cleanup = false;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
@@ -111,6 +113,8 @@ export function parseArgs(raw: string[]): CliArgs {
       stdout = true;
     } else if (arg === "--bitwarden" || arg === "-bw") {
       bitwardenItem = raw[++i] ?? null;
+    } else if (arg === "--cleanup") {
+      cleanup = true;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
@@ -138,5 +142,6 @@ export function parseArgs(raw: string[]): CliArgs {
     salt,
     stdout,
     bitwardenItem,
+    cleanup,
   };
 }
