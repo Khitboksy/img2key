@@ -73,6 +73,7 @@ interface CliArgs {
   siteName: string;
   length: number;
   outputDir: string | null;
+  salt: string | null;
 }
 
 export function parseArgs(raw: string[]): CliArgs {
@@ -80,6 +81,7 @@ export function parseArgs(raw: string[]): CliArgs {
   let siteName: string | null = null;
   let length = 32;
   let outputDir: string | null = null;
+  let salt: string | null = null;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
@@ -96,6 +98,8 @@ export function parseArgs(raw: string[]): CliArgs {
       }
     } else if (arg === "--out" || arg === "-o") {
       outputDir = raw[++i] ?? null;
+    } else if (arg === "--salt" || arg === "-s") {
+      salt = raw[++i] ?? null;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
@@ -115,5 +119,5 @@ export function parseArgs(raw: string[]): CliArgs {
     process.exit(1);
   }
 
-  return { imagePath, siteName, length, outputDir };
+  return { imagePath, siteName, length, outputDir, salt };
 }
