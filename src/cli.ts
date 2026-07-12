@@ -1,20 +1,5 @@
-import {
-  statSync,
-  openSync,
-  readSync,
-  closeSync,
-  readFileSync,
-  mkdirSync,
-  writeFileSync,
-} from "node:fs";
-import { createHash } from "node:crypto";
-import { homedir } from "node:os";
-import { join as joinPath } from "node:path";
-import { execSync } from "node:child_process";
+import { statSync, openSync, closeSync, readSync } from "node:fs";
 
-// img2key - derive deterministic passwords from images
-
-// Magic bytes for common image formats
 const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
   PNG: new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
   JPEG: new Uint8Array([0xff, 0xd8, 0xff]),
@@ -25,7 +10,7 @@ const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
 
 const VALID_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
-function validateImagePath(path: string): void {
+export function validateImagePath(path: string): void {
   // Check 1: file exists and is a file
   try {
     const stats = statSync(path);
@@ -90,7 +75,7 @@ interface CliArgs {
   outputDir: string | null;
 }
 
-function parseArgs(raw: string[]): CliArgs {
+export function parseArgs(raw: string[]): CliArgs {
   let imagePath: string | null = null;
   let siteName: string | null = null;
   let length = 32;
@@ -132,107 +117,3 @@ function parseArgs(raw: string[]): CliArgs {
 
   return { imagePath, siteName, length, outputDir };
 }
-
-function hashImage(path: string): Buffer {
-  return createHash("sha256").update(readFileSync(path)).digest();
-}
-
-const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const LOWER = "abcdefghijklmnopqrstuvwxyz";
-const DIGITS = "0123456789";
-const SPECIALS = "!@#$%^&";
-const ALL = UPPER + LOWER + DIGITS + SPECIALS;
-
-function sanitizeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
-}
-
-function resolveOutputDir(specified: string | null): string {
-  if (specified !== null) return specified;
-  return joinPath(homedir(), ".local", "share", "img2key");
-}
-
-function writePassword(
-  password: string,
-  siteName: string,
-  outputDir: string,
-): string {
-  const sanitized = sanitizeName(siteName);
-  const outPath = joinPath(outputDir, `${sanitized}.txt`);
-
-  mkdirSync(outputDir, { recursive: true });
-  writeFileSync(outPath, password + "\n", { mode: 0o600 });
-
-  return outPath;
-}
-
-const CLIPBOARD_CMDS: { cmd: string; hint: string }[] = [
-  { cmd: "wl-copy", hint: "wl-copy" },
-  { cmd: "xclip", hint: "xclip -sel clip" },
-  { cmd: "xsel", hint: "xsel -ib" },
-  { cmd: "pbcopy", hint: "pbcopy" },
-  { cmd: "clip.exe", hint: "clip.exe" },
-];
-
-function commandExists(cmd: string): boolean {
-  try {
-    execSync(`command -v ${cmd}`, { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function clipboardHint(): string {
-  const available = CLIPBOARD_CMDS.find(({ cmd }) => commandExists(cmd));
-  return available?.hint ?? "";
-}
-function generatePassword(hash: Buffer, length: number): string {
-  const pw: string[] = new Array(length);
-  let byteIdx = 0;
-
-  // Wraps around if we run out of bytes (can't happen at max length of 32)
-  // but handles it cleanly anyway.
-  function nextByte(): number {
-    return hash[byteIdx++ % hash.length]!;
-  }
-
-  // 1. Reserve: guarantee one character from each class
-  pw[0] = UPPER[nextByte() % UPPER.length]!;
-  pw[1] = LOWER[nextByte() % LOWER.length]!;
-  pw[2] = DIGITS[nextByte() % DIGITS.length]!;
-  pw[3] = SPECIALS[nextByte() % SPECIALS.length]!;
-
-  // 2. Fill: remaining positions from the combined pool
-  for (let i = 4; i < length; i++) {
-    pw[i] = ALL[nextByte() % ALL.length]!;
-  }
-
-  // 3. Shuffle: Fisher-Yates, deterministic from the hash
-  for (let i = length - 1; i > 0; i--) {
-    const j = nextByte() % (i + 1);
-    [pw[i], pw[j]] = [pw[j]!, pw[i]!];
-  }
-
-  return pw.join("");
-}
-
-function main() {
-  const args = parseArgs(process.argv.slice(2));
-
-  validateImagePath(args.imagePath);
-
-  const hashBytes = hashImage(args.imagePath);
-  const password = generatePassword(hashBytes, args.length);
-  const outDir = resolveOutputDir(args.outputDir);
-  const outPath = writePassword(password, args.siteName, outDir);
-
-  const clip = clipboardHint();
-
-  console.log("saved to:", outPath);
-  if (clip) {
-    console.log(`quick copy: cat ${outPath} | ${clip}`);
-  }
-}
-
-main();
