@@ -12,7 +12,7 @@ function main() {
 
   validateImagePath(args.imagePath);
 
-  const hashBytes = hashImage(args.imagePath);
+  const hashBytes = hashImage(args.imagePath, args.salt);
   const password = generatePassword(hashBytes, args.length);
   const outDir = resolveOutputDir(args.outputDir);
   const outPath = writePassword(password, args.siteName, outDir);

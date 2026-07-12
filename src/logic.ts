@@ -1,6 +1,6 @@
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { homedir } from "node:os";
 
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -10,8 +10,12 @@ const SPECIALS = "!@#$%^&";
 const ALL = UPPER + LOWER + DIGITS + SPECIALS;
 
 // Step One - Hash the image
-export function hashImage(path: string): Buffer {
-  return createHash("sha256").update(readFileSync(path)).digest();
+export function hashImage(path: string, salt: string | null): Buffer {
+  const imageBytes = readFileSync(path);
+  if (salt != null) {
+    return createHmac("sha256", salt).update(imageBytes).digest();
+  }
+  return createHash("sha256").update(imageBytes).digest();
 }
 
 // Step Two - Generate Password
