@@ -19,9 +19,19 @@ function main() {
 
   const clip = clipboardHint();
 
-  console.log("saved to:", outPath);
+  if (args.stdout) {
+    process.stdout.write(password + "\n");
+    process.stderr.write("saved to: " + outPath + "\n");
+  } else {
+    console.log("saved to:", outPath);
+  }
   if (clip) {
-    console.log(`quick copy: cat ${outPath} | ${clip}`);
+    const msg = `quick copy: cat ${outPath} | ${clip}`;
+    if (args.stdout) {
+      process.stderr.write(msg + "\n");
+    } else {
+      console.log(msg);
+    }
   }
 }
 
