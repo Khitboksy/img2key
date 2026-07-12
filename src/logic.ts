@@ -76,15 +76,14 @@ export function writePassword(
 
 // Optional Bitwarden Integration
 export function updateBitwarden(itemName: string, password: string): boolean {
+  console.log("Finding", itemName + ",");
   // 1. Get current item JSON from bitwarden
   const get = spawnSync("bw", ["get", "item", itemName], {
     encoding: "utf-8",
-    stdio: ["inherit", "pipe", "pipe"],
+    stdio: ["inherit", "pipe", "inherit"],
   });
 
-  if (get.status !== 0) {
-    console.error("Error: could not fetch item from bitwarden");
-    process.stderr.write(get.stderr);
+  if (get.status !== 0 || !get.stdout.trim()) {
     return false;
   }
 
@@ -96,18 +95,43 @@ export function updateBitwarden(itemName: string, password: string): boolean {
     console.error("Error: bitwarden returned invalid JSON");
     return false;
   }
+  const itemId = item.id as string;
+  if (!itemId) {
+    console.error("Error: bitwarden item has no id");
+    return false;
+  }
 
   if (!item.login || typeof item.login !== "object") {
     item.login = {};
   }
   (item.login as Record<string, unknown>).password = password;
 
-  // 3. Send the update -- bw prompts for master password via /dev/tty
-  const edit = spawnSync("bw", ["edit", "item", itemName], {
+  // 3. Encode the modified JSON using bw's own encoder
+  console.log("Encoding Password,");
+  const encode = spawnSync("bw", ["encode"], {
     input: JSON.stringify(item),
     encoding: "utf-8",
-    stdio: ["pipe", "inherit", "inherit"],
+    stdio: ["pipe", "pipe", "inherit"],
   });
 
-  return edit.status === 0;
+  if (encode.status !== 0) {
+    console.error("Error: bw encode failed");
+    return false;
+  }
+
+  const encoded = encode.stdout.trim();
+
+  // 4. Send the update -- argument instead of stdin so master password prompt works
+  console.log("Editing", itemName + ",");
+  const edit = spawnSync("bw", ["edit", "item", itemId, encoded], {
+    encoding: "utf-8",
+    stdio: ["inherit", "pipe", "inherit"],
+  });
+
+  if (edit.status !== 0) {
+    console.error("bw edit failed:", edit.stdout?.trim());
+    return false;
+  }
+  console.log("Your Bitwarden password for", itemName, "has been updated!");
+  return true;
 }
