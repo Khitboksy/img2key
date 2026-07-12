@@ -2,6 +2,7 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
 import { createHash, createHmac } from "node:crypto";
 import { homedir } from "node:os";
+import { spawnSync } from "node:child_process";
 
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWER = "abcdefghijklmnopqrstuvwxyz";
@@ -71,4 +72,42 @@ export function writePassword(
   writeFileSync(outPath, password + "\n", { mode: 0o600 });
 
   return outPath;
+}
+
+// Optional Bitwarden Integration
+export function updateBitwarden(itemName: string, password: string): boolean {
+  // 1. Get current item JSON from bitwarden
+  const get = spawnSync("bw", ["get", "item", itemName], {
+    encoding: "utf-8",
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  if (get.status !== 0) {
+    console.error("Error: could not fetch item from bitwarden");
+    process.stderr.write(get.stderr);
+    return false;
+  }
+
+  // 2. Modify the password in the JSON (no jq needed)
+  let item: Record<string, unknown>;
+  try {
+    item = JSON.parse(get.stdout);
+  } catch {
+    console.error("Error: bitwarden returned invalid JSON");
+    return false;
+  }
+
+  if (!item.login || typeof item.login !== "object") {
+    item.login = {};
+  }
+  (item.login as Record<string, unknown>).password = password;
+
+  // 3. Send the update -- bw prompts for master password via /dev/tty
+  const edit = spawnSync("bw", ["edit", "item", itemName], {
+    input: JSON.stringify(item),
+    encoding: "utf-8",
+    stdio: ["pipe", "inherit", "inherit"],
+  });
+
+  return edit.status === 0;
 }

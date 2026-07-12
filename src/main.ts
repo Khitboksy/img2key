@@ -5,6 +5,7 @@ import {
   generatePassword,
   resolveOutputDir,
   writePassword,
+  updateBitwarden,
 } from "./logic.ts";
 
 function main() {
@@ -22,6 +23,20 @@ function main() {
   if (args.stdout) {
     process.stdout.write(password + "\n");
     process.stderr.write("saved to: " + outPath + "\n");
+  }
+  if (args.bitwardenItem) {
+    const ok = updateBitwarden(args.bitwardenItem, password);
+
+    if (!ok) {
+      // bw failed -- file is still on disk as a manual fallback
+      console.error("Bitwarden update failed. Password saved to:", outPath);
+      const clip = clipboardHint();
+      if (clip) {
+        console.error(`quick copy: cat ${outPath} | ${clip}`);
+      }
+    }
+
+    return; // -vw mode: no "saved to:" message on success
   } else {
     console.log("saved to:", outPath);
   }
