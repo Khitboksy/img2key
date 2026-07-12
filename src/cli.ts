@@ -51,18 +51,19 @@ function printHelp(): never {
   console.log(`
 img2key - derive deterministic passwords from images
 
-usage: img2key <image> -n <name> [-l <len>] [-o <dir>] [-s <phrase>]
+usage: img2key <image> -n <name> [-l <len>] [-o <dir>] [-s <phrase>] [--stdout | wlcopy] [-bw <bw-item>]
 
 arguments:
   <image>                   path to the image file (png, jpg, gif, webp, bmp)
 
 options:
-  -n,   --name <name>         site name (used as the output filename)
-  -l,   --length <num>        password length (8-32, default: 32)
-  -o,   --out <dir>           output directory (default: ~/.local/share/img2key/)
-  -s,   --salt <phrase>       input your own phrase that gets added to the image data
-  --stdout,                   pushes generated password to stdout
-  -h,   --help                show this help text
+  -n,       --name <name>         site name (used as the output filename)
+  -l,       --length <num>        password length (8-32, default: 32)
+  -o,       --out <dir>           output directory (default: ~/.local/share/img2key/)
+  -s,       --salt <phrase>       input your own phrase that gets added to the image data
+  --stdout,                       pushes generated password to stdout
+  -bw       --bitwarden           uses --stdout to pipe the generated password into bitwarden-cli
+  -h,       --help                show this help text
 
 the password is written to a file with 600 permissions and printed only there,
 not in the terminal. a clipboard hint is shown when a compatible tool is found.
@@ -77,6 +78,7 @@ interface CliArgs {
   outputDir: string | null;
   salt: string | null;
   stdout: boolean;
+  bitwardenItem: string | null;
 }
 
 export function parseArgs(raw: string[]): CliArgs {
@@ -86,6 +88,7 @@ export function parseArgs(raw: string[]): CliArgs {
   let outputDir: string | null = null;
   let salt: string | null = null;
   let stdout = false;
+  let bitwardenItem: string | null = null;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
@@ -106,6 +109,8 @@ export function parseArgs(raw: string[]): CliArgs {
       salt = raw[++i] ?? null;
     } else if (arg === "--stdout") {
       stdout = true;
+    } else if (arg === "--bitwarden" || arg === "-bw") {
+      bitwardenItem = raw[++i] ?? null;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
@@ -125,5 +130,13 @@ export function parseArgs(raw: string[]): CliArgs {
     process.exit(1);
   }
 
-  return { imagePath, siteName, length, outputDir, salt, stdout };
+  return {
+    imagePath,
+    siteName,
+    length,
+    outputDir,
+    salt,
+    stdout,
+    bitwardenItem,
+  };
 }
