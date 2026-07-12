@@ -61,6 +61,7 @@ options:
   -l,   --length <num>        password length (8-32, default: 32)
   -o,   --out <dir>           output directory (default: ~/.local/share/img2key/)
   -s,   --salt <phrase>       input your own phrase that gets added to the image data
+  --stdout,                   pushes generated password to stdout
   -h,   --help                show this help text
 
 the password is written to a file with 600 permissions and printed only there,
@@ -75,6 +76,7 @@ interface CliArgs {
   length: number;
   outputDir: string | null;
   salt: string | null;
+  stdout: boolean;
 }
 
 export function parseArgs(raw: string[]): CliArgs {
@@ -83,6 +85,7 @@ export function parseArgs(raw: string[]): CliArgs {
   let length = 32;
   let outputDir: string | null = null;
   let salt: string | null = null;
+  let stdout = false;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
@@ -101,6 +104,8 @@ export function parseArgs(raw: string[]): CliArgs {
       outputDir = raw[++i] ?? null;
     } else if (arg === "--salt" || arg === "-s") {
       salt = raw[++i] ?? null;
+    } else if (arg === "--stdout") {
+      stdout = true;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
@@ -120,5 +125,5 @@ export function parseArgs(raw: string[]): CliArgs {
     process.exit(1);
   }
 
-  return { imagePath, siteName, length, outputDir, salt };
+  return { imagePath, siteName, length, outputDir, salt, stdout };
 }
