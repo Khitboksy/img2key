@@ -51,16 +51,17 @@ function printHelp(): never {
   console.log(`
 img2key - derive deterministic passwords from images
 
-usage: img2key <image> -n <name> [-l <len>] [-o <dir>]
+usage: img2key <image> -n <name> [-l <len>] [-o <dir>] [-s <phrase>]
 
 arguments:
   <image>                   path to the image file (png, jpg, gif, webp, bmp)
 
 options:
-  -n, --name <name>         site name (used as the output filename)
-  -l, --length <num>        password length (8-32, default: 32)
-  -o, --out <dir>           output directory (default: ~/.local/share/img2key/)
-  -h, --help                show this help text
+  -n,   --name <name>         site name (used as the output filename)
+  -l,   --length <num>        password length (8-32, default: 32)
+  -o,   --out <dir>           output directory (default: ~/.local/share/img2key/)
+  -s,   --salt <phrase>       input your own phrase that gets added to the image data
+  -h,   --help                show this help text
 
 the password is written to a file with 600 permissions and printed only there,
 not in the terminal. a clipboard hint is shown when a compatible tool is found.
