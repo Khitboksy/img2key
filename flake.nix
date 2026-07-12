@@ -66,7 +66,7 @@
           buildPhase = ''
             bun build --compile \
               --outfile=img2key \
-              ./index.ts
+              ./src/main.ts
           '';
 
           installPhase = ''

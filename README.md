@@ -119,5 +119,5 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun run src/main.ts
 ```

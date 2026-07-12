@@ -1,6 +1,6 @@
 {
   "name": "img2key",
-  "module": "main.ts",
+  "module": "src/main.ts",
   "type": "module",
   "private": true,
   "devDependencies": {

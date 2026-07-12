@@ -1,7 +1,3 @@
-// Remote Deps
-import {} from "node:fs";
-
-// Local Imports
 import { validateImagePath, parseArgs } from "./cli.ts";
 import { clipboardHint } from "./clip.ts";
 import {
