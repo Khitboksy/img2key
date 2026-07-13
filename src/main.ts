@@ -7,6 +7,7 @@ import {
   writePassword,
   deletePassword,
   updateBitwarden,
+  updateKeyring,
 } from "./logic.ts";
 
 function main() {
@@ -25,32 +26,35 @@ function main() {
     process.stdout.write(password + "\n");
     process.stderr.write("saved to: " + outPath + "\n");
   }
-  if (args.bitwardenItem) {
-    const ok = updateBitwarden(args.bitwardenItem, password);
-    if (ok && args.cleanup) {
-      deletePassword(outPath);
-    }
 
-    if (!ok) {
-      // bw failed -- file is still on disk as a manual fallback
-      console.error("Bitwarden update failed. Password saved to:", outPath);
-      const clip = clipboardHint();
+  let ok = true;
+
+  if (args.bitwardenItem) {
+    ok = updateBitwarden(args.bitwardenItem, password) && ok;
+  }
+
+  if (args.keyringItem) {
+    ok = updateKeyring(args.keyringItem, password) && ok;
+  }
+
+  if (args.bitwardenItem || args.keyringItem) {
+    if (ok) {
+      if (args.cleanup) {
+        deletePassword(outPath);
+      }
+    } else {
+      console.error("Update failed. Password saved to:", outPath);
       if (clip) {
         console.error(`quick copy: cat ${outPath} | ${clip}`);
       }
     }
-
-    return; // -vw mode: no "saved to:" message on success
-  } else {
-    console.log("saved to:", outPath);
+    return;
   }
-  if (clip) {
-    const msg = `quick copy: cat ${outPath} | ${clip}`;
-    if (args.stdout) {
-      process.stderr.write(msg + "\n");
-    } else {
-      console.log(msg);
-    }
+
+  // Default: no -bw, no -kr, no --stdout
+  if (!args.stdout) {
+    console.log("saved to:", outPath);
+    console.log(`quick copy: cat ${outPath} | ${clip}`);
   }
 }
 

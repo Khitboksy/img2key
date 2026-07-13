@@ -142,3 +142,31 @@ export function deletePassword(filePath: string): void {
     unlinkSync(filePath);
   } catch {}
 }
+
+// Optional secret-service Integration
+export function updateKeyring(account: string, password: string): boolean {
+  const store = spawnSync(
+    "secret-tool",
+    [
+      "store",
+      "--label",
+      `img2key: ${account}`,
+      "service",
+      "img2key",
+      "account",
+      account,
+    ],
+    {
+      input: password,
+      encoding: "utf-8",
+      stdio: ["pipe", "inherit", "inherit"],
+    },
+  );
+
+  if (store.status !== 0) {
+    console.error("Error: secret-tool failed");
+    return false;
+  }
+  console.error("Your keyring password for", account, "has been saved!");
+  return true;
+}
