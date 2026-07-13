@@ -22,10 +22,25 @@ jobs:
         run: |
           if [ "${{ runner.os }}" = "Windows" ]; then
             7z a img2key-windows.zip img2key.exe
+            echo "artifact=img2key-windows.zip" >> $GITHUB_ENV
           else
             chmod +x img2key
             tar czf img2key-${{ runner.os }}.tar.gz img2key
-          fi      
+            echo "artifact=img2key-${{ runner.os }}.tar.gz" >> $GITHUB_ENV
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.artifact }}
+          path: ${{ env.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: img2key-*
+          merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
           files: |
