@@ -9,6 +9,9 @@ Well, anyway, I made a thingy that does that!
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> --name <fileName> [--length <len>] [--out <dir>]`
 
+Note: This program has OPTIONAL [bitwarden-cli](https://bitwarden.com/help/cli/) integration that requires
+bitwarden to be installed.
+
 ### How Do I Install This?
 
 #### Nix Flakes
@@ -49,6 +52,10 @@ download the .exe, run the exe, img2key is now a scary terminal command!
 | `--name / -n` | Name of the generated file.  | `--name vaultwarden` > `vaultwarden.txt` |
 | `--length / -l` | Length of generated password. | `--length 12` |
 | `--out / -o` | Output directory. |  `--out /tmp/keys` > `/tmp/keys/vaultwarden.txt`|
+| `--stdout` | Push to stdout for piping |  |
+| `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` produces a different password than when `--salt` is omited entirely |
+| `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` changes `login.password` to be the generated one |
+| `-bw cleanup` | Delete <name>.txt when done updating | `img2key <image> -n github -bw github cleanup` removes `github.txt` from disk when done |
 
 ## I want to contribute
 
