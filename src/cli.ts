@@ -51,7 +51,7 @@ function printHelp(): never {
   console.log(`
 img2key - derive deterministic passwords from images
 
-usage: img2key <image> -n <name> [-l <len>] [-o <dir>] [-s <phrase>] [--stdout | wlcopy] [-bw <bw-item>]
+usage: img2key <image> -n <name> [-l <num>] [-o <dir>] [-s <phrase>] [--stdout] [-bw <bw-item> [cleanup]]
 
 arguments:
   <image>                   path to the image file (png, jpg, gif, webp, bmp)
@@ -62,8 +62,11 @@ options:
   -o,       --out <dir>           output directory (default: ~/.local/share/img2key/)
   -s,       --salt <phrase>       input your own phrase that gets added to the image data
   --stdout,                       pushes generated password to stdout
-  -bw       --bitwarden           uses --stdout to pipe the generated password into bitwarden-cli
+  -bw       --bitwarden <item>    pipe the generated password into bitwarden-cli items
   -h,       --help                show this help text
+
+sub-flags:
+  -bw cleanup,                    deletes the <name>.txt file upon completion
 
 the password is written to a file with 600 permissions and printed only there,
 not in the terminal. a clipboard hint is shown when a compatible tool is found.
@@ -113,8 +116,10 @@ export function parseArgs(raw: string[]): CliArgs {
       stdout = true;
     } else if (arg === "--bitwarden" || arg === "-bw") {
       bitwardenItem = raw[++i] ?? null;
-    } else if (arg === "--cleanup") {
-      cleanup = true;
+      if (raw[i + 1] === "cleanup") {
+        cleanup = true;
+        i++; // skip over "cleanup" so it's not misread as the image path
+      }
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
