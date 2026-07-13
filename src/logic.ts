@@ -1,4 +1,4 @@
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { readFileSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import { join as joinPath } from "node:path";
 import { createHash, createHmac } from "node:crypto";
 import { homedir } from "node:os";
@@ -134,4 +134,11 @@ export function updateBitwarden(itemName: string, password: string): boolean {
   }
   console.log("Your Bitwarden password for", itemName, "has been updated!");
   return true;
+}
+
+// When using bitwarden, remove password file from disk
+export function deletePassword(filePath: string): void {
+  try {
+    unlinkSync(filePath);
+  } catch {}
 }

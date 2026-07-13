@@ -5,6 +5,7 @@ import {
   generatePassword,
   resolveOutputDir,
   writePassword,
+  deletePassword,
   updateBitwarden,
 } from "./logic.ts";
 
@@ -26,6 +27,9 @@ function main() {
   }
   if (args.bitwardenItem) {
     const ok = updateBitwarden(args.bitwardenItem, password);
+    if (ok && args.cleanup) {
+      deletePassword(outPath);
+    }
 
     if (!ok) {
       // bw failed -- file is still on disk as a manual fallback
