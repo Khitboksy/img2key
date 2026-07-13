@@ -54,19 +54,20 @@ img2key - derive deterministic passwords from images
 usage: img2key <image> -n <name> [options]
 
 arguments:
-  <image>                   path to the image file (png, jpg, gif, webp, bmp)
+  <image>                           path to the image file (png, jpg, gif, webp, bmp)
 
 options:
-  -n,       --name <name>         site name (used as the output filename)
-  -l,       --length <num>        password length (8-32, default: 32)
-  -o,       --out <dir>           output directory (default: ~/.local/share/img2key/)
-  -s,       --salt <phrase>       input your own phrase that gets added to the image data
-  --stdout,                       pushes generated password to stdout
-  -bw       --bitwarden <item>    pipe the generated password into bitwarden-cli items
-  -h,       --help                show this help text
+  -n,       --name <name>           site name (used as the output filename)
+  -l,       --length <num>          password length (8-32, default: 32)
+  -o,       --out <dir>             output directory (default: ~/.local/share/img2key/)
+  -s,       --salt <phrase>         input your own phrase that gets added to the image data
+  --stdout,                         pushes generated password to stdout
+  -bw       --bitwarden <item>      pipe the generated password into bitwarden-cli items
+  -kr       --keyring <item>        pipe the generated password into secret-service
+  -h,       --help                  show this help text
 
 sub-flags:
-  -bw cleanup,                    deletes the <name>.txt file upon completion
+  cleanup,  -bw/-kr <item> cleanup  deletes the <name>.txt file upon completion
 
 the password is written to a file with 600 permissions and printed only there,
 not in the terminal. a clipboard hint is shown when a compatible tool is found.
@@ -82,6 +83,7 @@ interface CliArgs {
   salt: string | null;
   stdout: boolean;
   bitwardenItem: string | null;
+  keyringItem: string | null;
   cleanup: boolean;
 }
 
@@ -94,6 +96,7 @@ export function parseArgs(raw: string[]): CliArgs {
   let stdout = false;
   let bitwardenItem: string | null = null;
   let cleanup = false;
+  let keyringItem: string | null = null;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
@@ -119,6 +122,12 @@ export function parseArgs(raw: string[]): CliArgs {
       if (raw[i + 1] === "cleanup") {
         cleanup = true;
         i++; // skip over "cleanup" so it's not misread as the image path
+      }
+    } else if (arg === "--keyring" || arg === "-kr") {
+      keyringItem = raw[++i] ?? null;
+      if (raw[i + 1] === "cleanup") {
+        cleanup = true;
+        i++;
       }
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
@@ -147,6 +156,7 @@ export function parseArgs(raw: string[]): CliArgs {
     salt,
     stdout,
     bitwardenItem,
+    keyringItem,
     cleanup,
   };
 }
