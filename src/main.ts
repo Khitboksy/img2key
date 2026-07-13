@@ -46,6 +46,10 @@ function main() {
       console.error("Update failed. Password saved to:", outPath);
       if (clip) {
         console.error(`quick copy: cat ${outPath} | ${clip}`);
+      } else {
+        console.log(
+          `quick copy (no clipboard tool found): open ${outPath} and copy manually`,
+        );
       }
     }
     return;
@@ -54,7 +58,11 @@ function main() {
   // Default: no -bw, no -kr, no --stdout
   if (!args.stdout) {
     console.log("saved to:", outPath);
-    console.log(`quick copy: cat ${outPath} | ${clip}`);
+    if (clip) {
+      console.log(`quick copy: cat ${outPath} | ${clip}`);
+    } else {
+      console.log(`no clipboard tool found: open ${outPath} and copy manually`);
+    }
   }
 }
 
