@@ -20,14 +20,12 @@ jobs:
       - name: Package binary
         shell: bash
         run: |
-          chmod +x img2key
           if [ "${{ runner.os }}" = "Windows" ]; then
-            mv img2key img2key.exe
             7z a img2key-windows.zip img2key.exe
           else
+            chmod +x img2key
             tar czf img2key-${{ runner.os }}.tar.gz img2key
-          fi
-      - uses: softprops/action-gh-release@v2
+          fi      - uses: softprops/action-gh-release@v2
         with:
           files: |
             img2key-*.tar.gz
