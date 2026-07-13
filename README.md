@@ -52,10 +52,11 @@ download the .exe, run the exe, img2key is now a scary terminal command!
 | `--name / -n` | Name of the generated file.  | `--name vaultwarden` > `vaultwarden.txt` |
 | `--length / -l` | Length of generated password. | `--length 12` |
 | `--out / -o` | Output directory. |  `--out /tmp/keys` > `/tmp/keys/vaultwarden.txt`|
-| `--stdout` | Push to stdout for piping |  |
-| `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` produces a different password than when `--salt` is omited entirely |
-| `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` changes `login.password` to be the generated one |
-| `-bw <item> cleanup` | Delete `<name>.txt` when done updating | `img2key <image> -n github -bw github cleanup` removes `github.txt` from disk when done |
+| `--stdout` | Push to stdout for piping | `--stdout` |
+| `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` |
+| `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` |
+| `--keyring / -kr` | Pipe output to secret-service | `--keyring github` |
+| `cleanup` | Delete `<name>.txt` when done updating | `-bw github cleanup` |
 
 ## I want to contribute
 
