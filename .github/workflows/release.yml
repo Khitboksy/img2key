@@ -25,7 +25,8 @@ jobs:
           else
             chmod +x img2key
             tar czf img2key-${{ runner.os }}.tar.gz img2key
-          fi      - uses: softprops/action-gh-release@v2
+          fi      
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             img2key-*.tar.gz
