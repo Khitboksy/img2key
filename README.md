@@ -55,7 +55,7 @@ download the .exe, run the exe, img2key is now a scary terminal command!
 | `--stdout` | Push to stdout for piping |  |
 | `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` produces a different password than when `--salt` is omited entirely |
 | `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` changes `login.password` to be the generated one |
-| `-bw <item> cleanup` | Delete <name>.txt when done updating | `img2key <image> -n github -bw github cleanup` removes `github.txt` from disk when done |
+| `-bw <item> cleanup` | Delete `<name>.txt` when done updating | `img2key <image> -n github -bw github cleanup` removes `github.txt` from disk when done |
 
 ## I want to contribute
 
