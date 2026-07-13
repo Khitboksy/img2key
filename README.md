@@ -38,11 +38,11 @@ that you can invoke anywhere.
 
 #### Non-Nix Linux/MacOS
 
-Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)
--- Linux
+Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)  
+-- Linux  
 download the binary for linux/mac, `img2key-Linux/MacOS`. Invoke the binary as the command.
 
--- Windows
+-- Windows  
 download the .exe, run the exe, img2key is now a scary terminal command!
 
 ### Flags and Arguments
@@ -126,5 +126,5 @@ bun install
 To run:
 
 ```bash
-bun run src/main.ts
+bun run img2key
 ```
