@@ -11,7 +11,7 @@
     "types": [
       "bun"
     ],
-    "rootDir": "./src",
+    "rootDir": "./.",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

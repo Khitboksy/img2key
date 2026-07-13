@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "img2key": "bun run src/main.ts"
+    "img2key": "bun run src/main.ts",
+    "bump": "bun run scripts/bump.ts --"
   },
   "devDependencies": {
     "@types/bun": "latest"

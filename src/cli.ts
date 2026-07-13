@@ -1,4 +1,5 @@
 import { statSync, openSync, closeSync, readSync } from "node:fs";
+import { VERSION } from "./version.ts";
 
 const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
   PNG: new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
@@ -65,6 +66,7 @@ options:
   -bw       --bitwarden <item>      pipe the generated password into bitwarden-cli items
   -kr       --keyring <item>        pipe the generated password into secret-service
   -h,       --help                  show this help text
+  -v,       --version               show version and exit
 
 sub-flags:
   cleanup,  -bw/-kr <item> cleanup  deletes the <name>.txt file upon completion
@@ -129,6 +131,9 @@ export function parseArgs(raw: string[]): CliArgs {
         cleanup = true;
         i++;
       }
+    } else if (arg === "--version" || arg === "-v") {
+      console.log("img2key", VERSION);
+      process.exit(0);
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
     } else if (arg.startsWith("-")) {
