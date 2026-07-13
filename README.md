@@ -36,14 +36,33 @@ inputs.img2key.packages.<system>.default
 
 that you can invoke anywhere.
 
+Run with: `img2key <image> <name> [options]`
+
 #### Non-Nix Linux/MacOS
 
 Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)  
--- Linux  
-download the binary for linux/mac, `img2key-Linux/MacOS`. Invoke the binary as the command.
+-- Linux/MacOS  
+download the archive for linux/mac, `img2key-Linux` or `img2key-macOS`.  
+navigate to the downloaded archive and run
+
+```bash
+# Linux
+tar xzf img2key-Linux.tar.gz          # Extract the `img2key` binary
+sudo install img2key /usr/local/bin/  # Put `img2key` in $PATH and ensure executability
+```
+
+```bash
+# MacOS
+tar xzf img2key-macOS.tar.gz
+sudo install img2key /usr/local/bin/
+```
+
+Run with: `img2key <image> <name> [options]`
 
 -- Windows  
-download the .exe, run the exe, img2key is now a scary terminal command!
+download the archive for windows, `img2key-Windows.zip`.  
+navigate to the downloaded file, extract it.  
+Run with: `./img2key.exe <image> <name> [options]` from the extracted file location.
 
 ### Flags and Arguments
 
