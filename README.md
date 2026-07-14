@@ -9,6 +9,8 @@ Well, anyway, I made a thingy that does that!
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> -n <name> [options]`
 
+> If you ever see a version number ending with `x`, like `v1.3.0x`, that means a breaking change was introduced to the logic that **requires** that you regenerate the passwords. im sorry! >.<
+
 Note: This program has OPTIONAL [bitwarden-cli](https://bitwarden.com/help/cli/) and
 [secret-service](https://www.freedesktop.org/wiki/Specifications/secret-storage-spec/)
 integration via `-bw` and `-kr` respectively. Both require their respective CLI tools to
