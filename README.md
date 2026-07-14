@@ -1,20 +1,34 @@
+
 # img2key
 
 Have you ever wanted your memes to ALSO be your password? No? shit...
 Well, anyway, I made a thingy that does that!
 
+> [!WARNING]
+>
+> If you ever see a version number ending with `x`, like `v1.3.0x`, that means a breaking change
+> was introduced to the logic that **requires** that you regenerate the passwords.
+>
+> The passwords will still work, however the recovery pipeline for those old passwords is dead.
+>
+> im sorry! >.<
+
 ## How Do I Use This?
 
-1. install from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided `flake.nix` if you're on NixOS with flakes enabled.
+1. install from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided [`flake.nix`](#nix-flakes) if you're on NixOS with flakes enabled.
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> -n <name> [options]`
 
-> If you ever see a version number ending with `x`, like `v1.3.0x`, that means a breaking change was introduced to the logic that **requires** that you regenerate the passwords. im sorry! >.<
-
-Note: This program has OPTIONAL [bitwarden-cli](https://bitwarden.com/help/cli/) and
-[secret-service](https://www.freedesktop.org/wiki/Specifications/secret-storage-spec/)
-integration via `-bw` and `-kr` respectively. Both require their respective CLI tools to
-be installed.
+> [!NOTE]
+>
+> This program has optional integration for the following secret managers:
+>
+> - [bitwarden-cli](https://bitwarden.com/help/cli/)
+> Invoked with `--bitwarden <item> [cleanup] / -bw`
+> - [secret-service](https://github.com/swiesend/secret-service)
+> Invoked with `--keyring <item> [cleanup] / -kr`
+>
+> Both require their respective CLI tools to be installed.
 
 ### How Do I Install This?
 
@@ -84,79 +98,41 @@ Run with: `./img2key.exe <image> -n <name> [options]` from the extracted file lo
 
 ## I want to contribute
 
-It has some development dependencies.
+This project is written in `typescript`, using `bun` as the runtime for my machine. This program is fully portable under *just* `node`. `bun` is NOT required.
 
-> Nix users can use the provided `flake.nix` to skip all of this!
+> [!TIP]
+>
+> Nix users can use the provided [`flake.nix`](#nix-flakes) to skip straight to [here](#actually-doing-dev-work)!
 
-### Bun
+Pick your runtime:
 
-#### Linux
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-#### Windows
-
-```powershell
-powershell -c "irm bun.sh/install.ps1 | iex"
-```
-
-#### MacOS
-
-```bash
-brew install bun
-```
-
-### Node
-
-#### Arch/Cachy
-
-```bash
-sudo pacman -S nodejs
-```
-
-> Or you can use whatever repo you want, im not ur mom.
-
-#### Ubuntu/Debian
-
-```bash
-sudo apt install nodejs
-```
-
-> Why do I feel you already have these installed...
-
-#### Fedora/RHEL
-
-```bash
-sudo dnf install nodejs
-```
-
-> Deja-Vu...
-
-#### MacOS
-
-```bash
-brew install nodejs
-```
+| Runtime | Install |
+|---------|---------|
+| **Bun** | [bun.sh/docs/installation](https://bun.sh/docs/installation) |
+| **Node** | [nodejs.org](https://nodejs.org/) or your package manager |
 
 ## Actually doing dev work
 
-To install dependencies:
+Installing node deps, and running the dev script:
 
 ```bash
+# Bun
 bun install
-```
-
-To run:
-
-```bash
 bun run img2key
+
+# Node
+npm install
+npm run img2key
 ```
 
-To stage tags, and bump the version:
+Bumping the version number so the workflow triggers:
 
 ```bash
+# Bun
 bun run bump v1.x.x
+
+# Node
+npm run bump v1.x.x
+
 git push origin main && git push origin --tags
 ```
