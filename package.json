@@ -3,6 +3,7 @@
   "module": "src/main.ts",
   "type": "module",
   "private": true,
+  "license": "GPL-3.0-only",
   "scripts": {
     "img2key": "bun run src/main.ts",
     "bump": "bun run scripts/bump.ts --"
