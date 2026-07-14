@@ -15,7 +15,9 @@ Well, anyway, I made a thingy that does that!
 
 ## How Do I Use This?
 
-1. install from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided [`flake.nix`](#nix-flakes) if you're on NixOS with flakes enabled.
+### Quickstart
+
+1. [install](#how-do-i-install-this) from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided [`flake.nix`](#nix-flakes) if you're on NixOS with flakes enabled.
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> -n <name> [options]`
 
@@ -30,9 +32,23 @@ Well, anyway, I made a thingy that does that!
 >
 > Both require their respective CLI tools to be installed.
 
-### How Do I Install This?
+### Flags and Arguments
 
-#### Nix Flakes
+|  Flag  | Description    | Example |
+|--------------- | --------------- | --- |
+| `--name / -n` | Name of the generated file.  | `--name vaultwarden` > `vaultwarden.txt` |
+| `--length / -l` | Length of generated password. | `--length 12` |
+| `--out / -o` | Output directory. |  `--out /tmp/keys` > `/tmp/keys/vaultwarden.txt`|
+| `--stdout` | Push to stdout for piping | `--stdout` |
+| `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` |
+| `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` |
+| `--keyring / -kr` | Pipe output to secret-service | `--keyring github` |
+| `--version / -v` | Show version and exit | `--version` |
+| `cleanup` | Delete `<name>.txt` when done updating | `-bw github cleanup` |
+
+## How Do I Install This?
+
+### Nix Flakes
 
 Adding this to your flake.nix
 
@@ -56,11 +72,13 @@ that you can invoke anywhere.
 
 Run with: `img2key <image> -n <name> [options]`
 
-#### Non-Nix Linux/MacOS
+### Non-Nix Linux/MacOS
 
-Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)  
--- Linux/MacOS  
-download the archive for linux/mac, `img2key-Linux` or `img2key-macOS`.  
+Navigate to [Releases/v1.*/](https://github.com/Khitboksy/img2key/releases)
+
+#### Linux/MacOS  
+
+download the archive for linux/mac, `img2key-Linux.tar.gz` or `img2key-macOS.tar.gz`.  
 navigate to the downloaded archive and run
 
 ```bash
@@ -77,26 +95,13 @@ sudo install img2key /usr/local/bin/
 
 Run with: `img2key <image> -n <name> [options]`
 
--- Windows  
+#### Windows  
+
 download the archive for windows, `img2key-Windows.zip`.  
 navigate to the downloaded file, extract it.  
 Run with: `./img2key.exe <image> -n <name> [options]` from the extracted file location.
 
-### Flags and Arguments
-
-|  Flag  | Description    | Example |
-|--------------- | --------------- | --- |
-| `--name / -n` | Name of the generated file.  | `--name vaultwarden` > `vaultwarden.txt` |
-| `--length / -l` | Length of generated password. | `--length 12` |
-| `--out / -o` | Output directory. |  `--out /tmp/keys` > `/tmp/keys/vaultwarden.txt`|
-| `--stdout` | Push to stdout for piping | `--stdout` |
-| `--salt / -s` | Add user specified strings to the image bit data | `--salt "phrase"` |
-| `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` |
-| `--keyring / -kr` | Pipe output to secret-service | `--keyring github` |
-| `--version / -v` | Show version and exit | `--version` |
-| `cleanup` | Delete `<name>.txt` when done updating | `-bw github cleanup` |
-
-## I want to contribute
+## How do I contribute?
 
 This project is written in `typescript`, using `bun` as the runtime for my machine. This program is fully portable under *just* `node`. `bun` is NOT required.
 
@@ -111,7 +116,7 @@ Pick your runtime:
 | **Bun** | [bun.sh/docs/installation](https://bun.sh/docs/installation) |
 | **Node** | [nodejs.org](https://nodejs.org/) or your package manager |
 
-## Actually doing dev work
+## How do I actually do dev work?
 
 Installing node deps, and running the dev script:
 
