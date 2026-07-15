@@ -20,8 +20,20 @@ Well, anyway, I made a thingy that does that!
 1. [install](#how-do-i-install-this) from either the [Releases Tab](https://github.com/Khitboksy/img2key/releases), or use the provided [`flake.nix`](#nix-flakes) if you're on NixOS with flakes enabled.
 2. find an image you want to use as a password
 3. `img2key <path/to/file.png> [options]`
+
 By default, no data is written to disk. The generated password is always written
 into `stdout` so you can pipe into something like `wl-copy`.
+
+> [!TIP]
+> If you have already age encryption set up, you can use the following
+> commands to get that integrated before we continue.
+> If you want to use `encrypt`, you will need to install `age`
+
+Obtaining a key-pair
+`img2key getkey <path> [name]`
+
+Registering a public key
+`img2key setkey [<path> | <age1...>]`
 
 #### Standard Usage
 
@@ -36,14 +48,16 @@ into `stdout` so you can pipe into something like `wl-copy`.
 
 > [!NOTE]
 >
-> This program has optional integration for the following secret managers:
+> This program has optional integration for the following programs:
 >
 > - [bitwarden-cli](https://bitwarden.com/help/cli/)
 > Invoked with `--bitwarden <item> / -bw`
 > - [secret-service](https://github.com/swiesend/secret-service)
 > Invoked with `--keyring <item> / -kr`
+> - [age-encryption](https://github.com/filosottile/age)
+> Invoked with `img2key <image> encrypt <path> [name]`
 >
-> Both require their respective CLI tools to be installed.
+> All require their respective CLI tools to be installed.
 
 ### Flags and Arguments
 
@@ -54,6 +68,12 @@ into `stdout` so you can pipe into something like `wl-copy`.
 | `--bitwarden / -bw` | Pipe output to bitwarden-cli | `--bitwarden github` |
 | `--keyring / -kr` | Pipe output to secret-service | `--keyring github` |
 | `--version / -v` | Show version and exit | `--version` |
+
+| Argument | Description | Position/Example |
+| --- | --- | --- |
+| `setkey [<file> ,or, "age1..."]` | Set the public key for img2key | `img2key setkey /path/to/public/key.txt` |
+| `getkey <path> [name]` | Generate an age keypair | `img2key getkey ~/secrets img2key-helios` |
+| `encrypt <path> [name]` | Pipe output into age before writing to disk | `img2key image.png encrypt ~/secrets github` |
 
 ## How Do I Install This?
 
