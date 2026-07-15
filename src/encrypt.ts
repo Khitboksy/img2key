@@ -92,7 +92,7 @@ export function getkey(outDir: string, name: string): void {
 
   const output = result.stdout;
   const lines = output.split("\n");
-  const privateKey = lines.find((l) => l.startsWith("AGE SECRET KEY"))?.trim();
+  const privateKey = lines.find((l) => l.startsWith("AGE-SECRET-KEY-"))?.trim();
   const pubkeyLine = lines.find((l) => l.startsWith("# public key:"));
   const publicKey = pubkeyLine?.split(":")[1]?.trim();
 
