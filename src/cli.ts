@@ -1,4 +1,4 @@
-import { statSync, openSync, closeSync, readSync } from "node:fs";
+import { statSync, openSync, closeSync, readSync, writeSync } from "node:fs";
 import { VERSION } from "./version.ts";
 
 const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
@@ -10,6 +10,11 @@ const IMAGE_MAGIC_BYTES: Record<string, Uint8Array> = {
 };
 
 const VALID_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
+
+export function consoleLog(...args: unknown[]): void {
+  const message = args.map((a) => String(a)).join(" ") + "\n";
+  writeSync(2, message);
+}
 
 export function validateImagePath(path: string): void {
   // Check 1: file exists and is a file
@@ -52,60 +57,44 @@ function printHelp(): never {
   console.log(`
 img2key - derive deterministic passwords from images
 
-usage: img2key <image> -n <name> [options]
+usage: img2key <image> [options]
 
 arguments:
   <image>                           path to the image file (png, jpg, gif, webp, bmp)
 
 options:
-  -n,       --name <name>           site name (used as the output filename)
   -l,       --length <num>          password length (8-32, default: 32)
-  -o,       --out <dir>             output directory (default: ~/.local/share/img2key/)
   -s,       --salt <phrase>         input your own phrase that gets added to the image data
-  --stdout,                         pushes generated password to stdout
-  -bw       --bitwarden <item>      pipe the generated password into bitwarden-cli items
-  -kr       --keyring <item>        pipe the generated password into secret-service
+  -bw,      --bitwarden <item>      pipe the generated password into bitwarden-cli items
+  -kr,      --keyring <item>        pipe the generated password into secret-service
   -h,       --help                  show this help text
   -v,       --version               show version and exit
 
-sub-flags:
-  cleanup,  -bw/-kr <item> cleanup  deletes the <name>.txt file upon completion
-
-the password is written to a file with 600 permissions and printed only there,
-not in the terminal. a clipboard hint is shown when a compatible tool is found.
+the password is always printed to stdout so you can pipe into something like wl-copy.
+the program DOES NOT write ANY data to disk, only passing data along to integrated software
 `);
   process.exit(0);
 }
 
 interface CliArgs {
   imagePath: string;
-  siteName: string;
   length: number;
-  outputDir: string | null;
   salt: string | null;
-  stdout: boolean;
   bitwardenItem: string | null;
   keyringItem: string | null;
-  cleanup: boolean;
 }
 
 export function parseArgs(raw: string[]): CliArgs {
   let imagePath: string | null = null;
-  let siteName: string | null = null;
   let length = 32;
-  let outputDir: string | null = null;
   let salt: string | null = null;
-  let stdout = false;
   let bitwardenItem: string | null = null;
-  let cleanup = false;
   let keyringItem: string | null = null;
 
   for (let i = 0; i < raw.length; i++) {
     const arg = raw[i]!;
 
-    if (arg === "--name" || arg === "-n") {
-      siteName = raw[++i] ?? null;
-    } else if (arg === "--length" || arg === "-l") {
+    if (arg === "--length" || arg === "-l") {
       const val = raw[++i];
       if (val === undefined) break;
       length = Number.parseInt(val, 10);
@@ -113,24 +102,12 @@ export function parseArgs(raw: string[]): CliArgs {
         console.error("Error: --length must be a number between 8 and 32");
         process.exit(1);
       }
-    } else if (arg === "--out" || arg === "-o") {
-      outputDir = raw[++i] ?? null;
     } else if (arg === "--salt" || arg === "-s") {
       salt = raw[++i] ?? null;
-    } else if (arg === "--stdout") {
-      stdout = true;
     } else if (arg === "--bitwarden" || arg === "-bw") {
       bitwardenItem = raw[++i] ?? null;
-      if (raw[i + 1] === "cleanup") {
-        cleanup = true;
-        i++; // skip over "cleanup" so it's not misread as the image path
-      }
     } else if (arg === "--keyring" || arg === "-kr") {
       keyringItem = raw[++i] ?? null;
-      if (raw[i + 1] === "cleanup") {
-        cleanup = true;
-        i++;
-      }
     } else if (arg === "--version" || arg === "-v") {
       console.log("img2key", VERSION);
       process.exit(0);
@@ -138,30 +115,28 @@ export function parseArgs(raw: string[]): CliArgs {
       printHelp();
     } else if (arg.startsWith("-")) {
       console.error(`Error: unknown flag "${arg}"`);
+      console.error("Run 'img2key --help' for details.");
       process.exit(1);
     } else if (imagePath === null) {
       imagePath = arg;
     } else {
       console.error(`Error: unexpected argument "${arg}"`);
+      console.error("Run 'img2key --help' for details.");
       process.exit(1);
     }
   }
 
-  if (imagePath === null || siteName === null) {
-    console.error("Usage: img2key <image> -n <name> [-l <len>] [-o <dir>]");
+  if (imagePath === null) {
+    console.error("Usage: img2key <image> [options]");
     console.error("Run 'img2key --help' for details.");
     process.exit(1);
   }
 
   return {
     imagePath,
-    siteName,
     length,
-    outputDir,
     salt,
-    stdout,
     bitwardenItem,
     keyringItem,
-    cleanup,
   };
 }

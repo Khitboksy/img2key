@@ -3,6 +3,7 @@ import { join as joinPath } from "node:path";
 import { createHash, createHmac } from "node:crypto";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
+import { consoleLog } from "./cli.ts";
 
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWER = "abcdefghijklmnopqrstuvwxyz";
@@ -84,7 +85,7 @@ export function writePassword(
 
 // Optional Bitwarden Integration
 export function updateBitwarden(itemName: string, password: string): boolean {
-  console.log("Finding", itemName + ",");
+  consoleLog("Finding", itemName + ",");
   // 1. Get current item JSON from bitwarden
   const get = spawnSync("bw", ["get", "item", itemName], {
     encoding: "utf-8",
@@ -115,7 +116,7 @@ export function updateBitwarden(itemName: string, password: string): boolean {
   (item.login as Record<string, unknown>).password = password;
 
   // 3. Encode the modified JSON using bw's own encoder
-  console.log("Encoding Password,");
+  consoleLog("Encoding Password,");
   const encode = spawnSync("bw", ["encode"], {
     input: JSON.stringify(item),
     encoding: "utf-8",
@@ -130,7 +131,7 @@ export function updateBitwarden(itemName: string, password: string): boolean {
   const encoded = encode.stdout.trim();
 
   // 4. Send the update -- argument instead of stdin so master password prompt works
-  console.log("Editing", itemName + ",");
+  consoleLog("Editing", itemName + ",");
   const edit = spawnSync("bw", ["edit", "item", itemId, encoded], {
     encoding: "utf-8",
     stdio: ["inherit", "pipe", "inherit"],
@@ -140,7 +141,7 @@ export function updateBitwarden(itemName: string, password: string): boolean {
     console.error("bw edit failed:", edit.stdout?.trim());
     return false;
   }
-  console.log("Your Bitwarden password for", itemName, "has been updated!");
+  consoleLog("Your Bitwarden password for", itemName, "has been updated!");
   return true;
 }
 
@@ -175,6 +176,6 @@ export function updateKeyring(account: string, password: string): boolean {
     console.error("Error: secret-tool failed");
     return false;
   }
-  console.error("Your keyring password for", account, "has been saved!");
+  consoleLog("Your keyring password for", account, "has been saved!");
   return true;
 }

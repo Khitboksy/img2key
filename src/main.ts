@@ -1,11 +1,7 @@
-import { validateImagePath, parseArgs } from "./cli.ts";
-import { clipboardHint } from "./clip.ts";
+import { validateImagePath, parseArgs, consoleLog } from "./cli.ts";
 import {
   hashImage,
   generatePassword,
-  resolveOutputDir,
-  writePassword,
-  deletePassword,
   updateBitwarden,
   updateKeyring,
 } from "./logic.ts";
@@ -17,15 +13,8 @@ function main() {
 
   const hashBytes = hashImage(args.imagePath, args.salt);
   const password = generatePassword(hashBytes, args.length);
-  const outDir = resolveOutputDir(args.outputDir);
-  const outPath = writePassword(password, args.siteName, outDir);
 
-  const clip = clipboardHint();
-
-  if (args.stdout) {
-    process.stdout.write(password + "\n");
-    process.stderr.write("saved to: " + outPath + "\n");
-  }
+  process.stdout.write(password + "\n");
 
   let ok = true;
 
@@ -39,29 +28,10 @@ function main() {
 
   if (args.bitwardenItem || args.keyringItem) {
     if (ok) {
-      if (args.cleanup) {
-        deletePassword(outPath);
-      }
+      consoleLog("All integrations updated successfully.");
     } else {
-      console.error("Update failed. Password saved to:", outPath);
-      if (clip) {
-        console.error(`quick copy: cat ${outPath} | ${clip}`);
-      } else {
-        console.log(
-          `quick copy (no clipboard tool found): open ${outPath} and copy manually`,
-        );
-      }
-    }
-    return;
-  }
-
-  // Default: no -bw, no -kr, no --stdout
-  if (!args.stdout) {
-    console.log("saved to:", outPath);
-    if (clip) {
-      console.log(`quick copy: cat ${outPath} | ${clip}`);
-    } else {
-      console.log(`no clipboard tool found: open ${outPath} and copy manually`);
+      console.error("One or more integrations failed.");
+      consoleLog("Password was still written to stdout");
     }
   }
 }
