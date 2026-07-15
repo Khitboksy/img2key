@@ -1,7 +1,5 @@
-import { readFileSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
-import { join as joinPath } from "node:path";
+import { readFileSync } from "node:fs";
 import { createHash, createHmac } from "node:crypto";
-import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { consoleLog } from "./cli.ts";
 
@@ -56,31 +54,6 @@ export function generatePassword(hash: Buffer, length: number): string {
   }
 
   return pw.join("");
-}
-// Step Three - Ensure clean file path names
-function sanitizeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
-}
-
-// Step Four - Ensure output path is real
-export function resolveOutputDir(specified: string | null): string {
-  if (specified !== null) return specified;
-  return joinPath(homedir(), ".local", "share", "img2key");
-}
-
-// Step Five - Push the password to a chown600 permissions file
-export function writePassword(
-  password: string,
-  siteName: string,
-  outputDir: string,
-): string {
-  const sanitized = sanitizeName(siteName);
-  const outPath = joinPath(outputDir, `${sanitized}.txt`);
-
-  mkdirSync(outputDir, { recursive: true });
-  writeFileSync(outPath, password + "\n", { mode: 0o600 });
-
-  return outPath;
 }
 
 // Optional Bitwarden Integration
@@ -143,13 +116,6 @@ export function updateBitwarden(itemName: string, password: string): boolean {
   }
   consoleLog("Your Bitwarden password for", itemName, "has been updated!");
   return true;
-}
-
-// When using bitwarden, remove password file from disk
-export function deletePassword(filePath: string): void {
-  try {
-    unlinkSync(filePath);
-  } catch {}
 }
 
 // Optional secret-service Integration
