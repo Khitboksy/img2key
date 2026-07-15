@@ -29,25 +29,26 @@ function main() {
         const pubkey = getStoredPubkey();
         const encrypted = encryptPassword(password, pubkey);
 
+        mkdirSync(result.encrypt.outDir, { recursive: true });
+        const outPath = join(
+          result.encrypt.outDir,
+          result.encrypt.name + ".enc",
+        );
+        writeFileSync(outPath, encrypted + "\n");
+        consoleLog("Encrypted password written to", outPath);
+
+        process.stdout.write(encrypted + "\n");
+
         if (result.bitwardenItem || result.keyringItem) {
-          // With integrations: write encrypted file + plaintext to integration
-          mkdirSync(result.encrypt.outDir, { recursive: true });
-          const outPath = join(
-            result.encrypt.outDir,
-            result.encrypt.name + ".enc",
-          );
-          writeFileSync(outPath, encrypted + "\n");
-          consoleLog("Encrypted password written to", outPath);
+          // falls through to the integration block below
         } else {
-          // Without integrations: encrypted blob to stdout only
-          process.stdout.write(encrypted + "\n");
-          return;
+          return; // no integrations, done
         }
       } else {
         process.stdout.write(password + "\n");
       }
 
-      // Integrations (same as current logic)
+      // Integrations
       let ok = true;
       if (result.bitwardenItem) {
         ok = updateBitwarden(result.bitwardenItem, password) && ok;
